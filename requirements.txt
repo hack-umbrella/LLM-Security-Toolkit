@@ -2,3 +2,10 @@ torch>=2.0.0
 transformers>=4.21.0
 h5py>=3.7.0
 numpy>=1.21.0
+
+# Web界面 (可选)
+flask>=2.0.0
+
+# 开发依赖
+black>=22.0.0
+flake8>=4.0.0

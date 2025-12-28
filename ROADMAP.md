@@ -55,7 +55,7 @@ SafeLoader.load_diffusers_pipeline()
 - 合规性检查报告
 
 # 可视化界面
-- Web 界面 (Flask/FastAPI)
+- ✅ Web 界面 (Flask) - 已实现基础版本
 - 扫描结果可视化
 - 历史审计追踪
 ```

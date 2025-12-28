@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Security Toolkit - AI安全扫描工具</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .upload-section, .scan-section, .results-section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .upload-section {
+            border-left: 5px solid #667eea;
+        }
+
+        .scan-section {
+            border-left: 5px solid #28a745;
+        }
+
+        .results-section {
+            grid-column: 1 / -1;
+            border-left: 5px solid #ffc107;
+        }
+
+        h2 {
+            color: #333;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .upload-area {
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background-color: #f8f9fa;
+        }
+
+        .upload-area:hover {
+            border-color: #5a67d8;
+            background-color: #f1f5f9;
+        }
+
+        .upload-area.dragover {
+            border-color: #48bb78;
+            background-color: #f0fff4;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .file-list {
+            margin-top: 20px;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .file-name {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .file-size {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .remove-file {
+            color: #dc3545;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .scan-btn {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .scan-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(72, 187, 120, 0.3);
+        }
+
+        .scan-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results-container {
+            display: none;
+        }
+
+        .result-item {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid;
+        }
+
+        .result-safe {
+            background-color: #f0fff4;
+            border-left-color: #48bb78;
+        }
+
+        .result-warning {
+            background-color: #fffaf0;
+            border-left-color: #ed8936;
+        }
+
+        .result-danger {
+            background-color: #fed7d7;
+            border-left-color: #e53e3e;
+        }
+
+        .result-file {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .result-status {
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .status-safe {
+            background-color: #c6f6d5;
+            color: #22543d;
+        }
+
+        .status-warning {
+            background-color: #fed7cc;
+            color: #7c2d12;
+        }
+
+        .status-danger {
+            background-color: #feb2b2;
+            color: #742a2a;
+        }
+
+        .issues-list {
+            margin-top: 10px;
+        }
+
+        .issue-item {
+            background: rgba(255, 255, 255, 0.5);
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .summary {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .summary-item {
+            flex: 1;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 0 5px;
+        }
+
+        .summary-safe {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+        }
+
+        .summary-warning {
+            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+            color: white;
+        }
+
+        .summary-danger {
+            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+            color: white;
+        }
+
+        .summary-number {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .footer {
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🛡️ LLM Security Toolkit</h1>
+        <p>AI安全扫描工具 - 把AI安全从"艺术"变成"科学"</p>
+    </div>
+
+    <div class="container">
+        <div class="upload-section">
+            <h2>📁 文件上传</h2>
+            <div class="upload-area" id="uploadArea">
+                <div>
+                    <h3>拖拽文件到此处或点击选择</h3>
+                    <p>支持的文件类型: .pth, .pkl, .bin, .json, .h5</p>
+                    <input type="file" id="fileInput" multiple accept=".pth,.pkl,.bin,.json,.h5">
+                </div>
+            </div>
+            <div class="file-list" id="fileList"></div>
+        </div>
+
+        <div class="scan-section">
+            <h2>🔍 安全扫描</h2>
+            <p>上传文件后，点击开始扫描按钮进行安全检测</p>
+            <button class="scan-btn" id="scanBtn" disabled>开始扫描</button>
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>正在扫描文件，请稍候...</p>
+            </div>
+        </div>
+
+        <div class="results-section">
+            <h2>📊 扫描结果</h2>
+            <div class="summary" id="summary" style="display: none;">
+                <div class="summary-item summary-safe">
+                    <div class="summary-number" id="safeCount">0</div>
+                    <div>安全文件</div>
+                </div>
+                <div class="summary-item summary-warning">
+                    <div class="summary-number" id="warningCount">0</div>
+                    <div>警告文件</div>
+                </div>
+                <div class="summary-item summary-danger">
+                    <div class="summary-number" id="dangerCount">0</div>
+                    <div>危险文件</div>
+                </div>
+            </div>
+            <div class="results-container" id="resultsContainer"></div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>
+            LLM Security Toolkit |
+            <a href="https://github.com/your-username/llm-sec-toolkit" target="_blank">GitHub</a> |
+            <a href="https://github.com/your-username/llm-sec-toolkit/blob/main/README.md" target="_blank">文档</a>
+        </p>
+    </div>
+
+    <script>
+        let uploadedFiles = [];
+
+        // 上传区域事件
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+        const scanBtn = document.getElementById('scanBtn');
+
+        // 点击上传区域触发文件选择
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // 文件选择事件
+        fileInput.addEventListener('change', handleFiles);
+
+        // 拖拽事件
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            handleFiles(e);
+        });
+
+        function handleFiles(e) {
+            const files = e.target.files || e.dataTransfer.files;
+            for (let file of files) {
+                // 检查文件类型
+                const allowedExtensions = ['.pth', '.pkl', '.bin', '.json', '.h5'];
+                const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+
+                if (allowedExtensions.includes(fileExtension)) {
+                    uploadedFiles.push(file);
+                    displayFile(file);
+                } else {
+                    alert(`不支持的文件类型: ${file.name}\n支持的文件类型: ${allowedExtensions.join(', ')}`);
+                }
+            }
+            updateScanButton();
+        }
+
+        function displayFile(file) {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            fileItem.innerHTML = `
+                <div>
+                    <div class="file-name">${file.name}</div>
+                    <div class="file-size">${formatFileSize(file.size)}</div>
+                </div>
+                <span class="remove-file" onclick="removeFile('${file.name}')">×</span>
+            `;
+            fileList.appendChild(fileItem);
+        }
+
+        function removeFile(fileName) {
+            uploadedFiles = uploadedFiles.filter(file => file.name !== fileName);
+            updateFileList();
+            updateScanButton();
+        }
+
+        function updateFileList() {
+            fileList.innerHTML = '';
+            uploadedFiles.forEach(displayFile);
+        }
+
+        function updateScanButton() {
+            scanBtn.disabled = uploadedFiles.length === 0;
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // 扫描功能
+        scanBtn.addEventListener('click', startScan);
+
+        async function startScan() {
+            if (uploadedFiles.length === 0) return;
+
+            // 显示加载状态
+            document.getElementById('loading').style.display = 'block';
+            scanBtn.disabled = true;
+
+            try {
+                const formData = new FormData();
+                uploadedFiles.forEach(file => {
+                    formData.append('files', file);
+                });
+
+                const response = await fetch('/upload_scan', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    displayResults(result.results);
+                } else {
+                    alert('扫描失败: ' + result.error);
+                }
+            } catch (error) {
+                alert('扫描出错: ' + error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                scanBtn.disabled = false;
+            }
+        }
+
+        function displayResults(results) {
+            const summary = document.getElementById('summary');
+            const resultsContainer = document.getElementById('resultsContainer');
+
+            // 统计数据
+            let safeCount = 0, warningCount = 0, dangerCount = 0;
+
+            results.forEach(result => {
+                if (result.is_safe) {
+                    safeCount++;
+                } else if (result.risk_level === 'high') {
+                    dangerCount++;
+                } else {
+                    warningCount++;
+                }
+            });
+
+            // 更新统计
+            document.getElementById('safeCount').textContent = safeCount;
+            document.getElementById('warningCount').textContent = warningCount;
+            document.getElementById('dangerCount').textContent = dangerCount;
+            summary.style.display = 'flex';
+
+            // 显示详细结果
+            resultsContainer.innerHTML = '';
+            results.forEach(result => {
+                const resultItem = document.createElement('div');
+                resultItem.className = `result-item ${result.is_safe ? 'result-safe' : (result.risk_level === 'high' ? 'result-danger' : 'result-warning')}`;
+
+                let issuesHtml = '';
+                if (result.issues && result.issues.length > 0) {
+                    issuesHtml = '<div class="issues-list"><strong>发现问题:</strong>' +
+                        result.issues.map(issue => `<div class="issue-item">${issue}</div>`).join('') +
+                        '</div>';
+                }
+
+                resultItem.innerHTML = `
+                    <div class="result-file">${result.file_name}</div>
+                    <div class="result-status ${result.is_safe ? 'status-safe' : (result.risk_level === 'high' ? 'status-danger' : 'status-warning')}">
+                        ${result.is_safe ? '✅ 安全' : `⚠️ 风险等级: ${result.risk_level}`}
+                    </div>
+                    ${issuesHtml}
+                `;
+
+                resultsContainer.appendChild(resultItem);
+            });
+
+            resultsContainer.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

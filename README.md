@@ -44,7 +44,9 @@ cd llm-sec-toolkit
 pip install -r requirements.txt
 ```
 
-### 使用CLI工具
+### 使用方式
+
+#### CLI工具
 
 ```bash
 # 扫描PyTorch模型文件
@@ -60,7 +62,25 @@ python main.py scan path/to/model.h5
 python main.py load torch path/to/model.pth --weights-only
 ```
 
-### 运行演示
+#### Web界面 (可选)
+
+```bash
+# 安装额外依赖
+pip install flask
+
+# 启动Web界面
+python web_ui.py
+
+# 访问 http://localhost:5500
+```
+
+**Web界面特性**：
+- 📁 **拖拽上传**：支持拖拽文件或点击选择
+- 🔍 **自动扫描**：上传后自动检测文件类型并扫描
+- 📊 **实时结果**：直观的扫描结果展示和统计
+- 🎨 **现代化UI**：响应式设计，支持移动端
+
+#### 运行演示
 
 ```bash
 python demo.py
@@ -88,6 +108,29 @@ python demo.py
   - Lambda层 (可能包含恶意代码)
   - 可疑的函数序列化数据
   - 危险的关键字 (`exec`, `eval`, `import`, `os.system`)
+
+### 4. ONNX模型扫描器 (OnnxScanner)
+- **文件类型**: `.onnx`
+- **检测内容**:
+  - 可疑的操作符和脚本执行
+  - 异常的元数据和配置
+  - 文件结构完整性检查
+
+### 5. 模型架构扫描器 (ModelArchitectureScanner)
+- **文件类型**: `.safetensors`, 通用模型文件
+- **检测内容**:
+  - SafeTensors文件结构异常
+  - 元数据中的可疑内容
+  - 文件大小和格式异常
+  - 通用安全检查
+
+### 6. 依赖文件扫描器 (DependencyScanner)
+- **文件类型**: `requirements.txt`, `setup.py`, `package.json`等
+- **检测内容**:
+  - 已知恶意包
+  - 可疑的包命名模式
+  - 外部URL引用
+  - 依赖安全风险
 
 ## 🛡️ 安全加载器
 
