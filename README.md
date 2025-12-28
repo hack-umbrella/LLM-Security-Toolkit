@@ -1,4 +1,6 @@
-# LLM Security Toolkit (LLM安全工具包)
+# LLM Security Toolkit (LLM安全工具包)   枇杷熟了团队
+**知识星球优惠卷享受企业内测版** 
+<img width="360" height="346" alt="image" src="https://github.com/user-attachments/assets/228ea817-cbf1-4f6f-80ff-217039bfd5c4" />
 
 🚀 **把AI安全从"艺术"变成"科学"** 🚀
 
@@ -81,6 +83,7 @@ python web_ui.py
 - 🎨 **现代化UI**：响应式设计，支持移动端
 
 #### 运行演示
+<img width="2650" height="1916" alt="image" src="https://github.com/user-attachments/assets/613a2549-e36f-4713-a261-82fb4ec23db0" />
 
 ```bash
 python demo.py
