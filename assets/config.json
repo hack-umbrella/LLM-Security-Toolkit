@@ -1,0 +1,7 @@
+{
+    "model_type": "malicious_type",
+    "auto_map": {
+        "AutoConfig": "malicious_code.MaliciousConfig"
+    },
+    "trust_remote_code": true
+}
